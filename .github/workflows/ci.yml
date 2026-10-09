@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "ci-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install
+      - run: npx playwright install --with-deps
+      # The Playwright config's webServer block auto-starts ShopDemo (sut/server.js) on :7070.
+      # Demo tests intentionally fail against seeded defects, so don't gate the build here.
+      - name: Run Playwright tests
+        run: npx playwright test || true
+      - name: Build KPI dashboard
+        if: always()
+        run: >
+          node scripts/kpi-report.js --pw test-results/results.json --out kpis-out
+          --branch "${{ github.ref_name }}" --commit "${{ github.sha }}"
+          --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      - name: KPI summary to the run
+        if: always()
+        run: cat kpis-out/kpi-summary.md >> "$GITHUB_STEP_SUMMARY" || true
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          if-no-files-found: ignore
+      - name: Upload Pages artifact (KPI dashboard)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: kpis-out
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: "${{ steps.deploy.outputs.page_url }}"
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

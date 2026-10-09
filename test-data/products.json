@@ -1,0 +1,8 @@
+{
+  "catalog": [
+    { "name": "Sauce Labs Backpack", "price": 29.99 },
+    { "name": "Sauce Labs Bike Light", "price": 9.99 },
+    { "name": "Sauce Labs Fleece Jacket", "price": 49.99 }
+  ],
+  "taxRate": 0.08
+}

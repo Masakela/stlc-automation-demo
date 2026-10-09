@@ -1,0 +1,8 @@
+{
+  "standard_user":            { "password": "secret_sauce", "valid": true,  "note": "clean account" },
+  "problem_user":             { "password": "secret_sauce", "valid": true,  "note": "cart badge miscount (DEF-002)" },
+  "error_user":               { "password": "secret_sauce", "valid": true,  "note": "add-to-cart + total bugs (DEF-003/004)" },
+  "performance_glitch_user":  { "password": "secret_sauce", "valid": true,  "note": "performance NFR" },
+  "locked_out_user":          { "password": "secret_sauce", "valid": false, "note": "locked out — negative case" },
+  "bad_user":                 { "password": "wrong",        "valid": false, "note": "invalid credentials — negative case" }
+}
